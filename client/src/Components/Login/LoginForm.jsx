@@ -1,17 +1,68 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { FaGoogle, FaApple, FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import validator from "validator";
+import ReactLoading from "react-loading";
+
+
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const emailRef = useRef()
+  const passwordRef = useRef()
+
+
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    if (!email || !password) {
+      toast.error("Please fill all the fields");
+      emailRef.current.style.border = "2px solid red";
+      passwordRef.current.style.border = "2px solid red";
+      return;
+    }else if (!validator.isEmail(email)) {
+      toast.error("Please enter a valid email");
+      emailRef.current.style.border = "2px solid red";
+      return;
+    }
+
+    const data = await fetch('/api/auth/login',{
+      method:"POST",
+      headers:{
+        "content-type":"application/json"
+      },
+      body:JSON.stringify({
+        email,
+        password
+      })
+    })
+
+    const res = await data.json()
+
+    console.log(res);
+    
+    if(!res.success) return toast.error(res.message) , setLoading(false)
+
+    if(res.success){  
+      toast.success("Welcome Back");
+      setLoading(false)
+    }
+
+
+  }
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
   return (
-    <div className="flex z-1 justify-center items-center h-screen grad-bg  ">
-      <div className="w-full max-w-md bg-white shadow-md rounded-2xl p-6">
+    <div className="flex z-1 justify-center   h-screen grad-bg  ">
+      <div className="w-full xs:h-[550px] xs:mt-[50px] lg:h-[550px] lg:mt-24 max-w-md bg-white shadow-md rounded-2xl p-6">
         <h2 className="text-2xl font-bold mb-6 text-center">Sign In</h2>
 
         <div className="mb-4">
@@ -28,9 +79,11 @@ const LoginPage = () => {
               </g>
             </svg>
             <input
+              ref={emailRef}
               type="text"
               className="w-full border-none outline-none bg-transparent ml-3"
               placeholder="Enter your Email"
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
         </div>
@@ -48,9 +101,11 @@ const LoginPage = () => {
               <path d="m304 224c-8.832031 0-16-7.167969-16-16v-80c0-52.929688-43.070312-96-96-96s-96 43.070312-96 96v80c0 8.832031-7.167969 16-16 16s-16-7.167969-16-16v-80c0-70.59375 57.40625-128 128-128s128 57.40625 128 128v80c0 8.832031-7.167969 16-16 16zm0 0"></path>
             </svg>
             <input
+            ref={passwordRef}
               type={showPassword ? "text" : "password"}
               className="w-full border-none outline-none bg-transparent ml-3"
               placeholder="Enter your Password"
+              onChange={(e) => setPassword(e.target.value)}
             />
             <div
               className="absolute right-3 cursor-pointer"
@@ -71,8 +126,8 @@ const LoginPage = () => {
           </a>
         </div>
 
-        <button className="w-full py-2 bg-blue-500 text-white rounded-lg transition duration-200 btn-grad">
-          Sign In
+        <button onClick={handleLogin} className="w-full py-2 bg-blue-500 text-white rounded-lg transition duration-200 btn-grad">
+         {loading ? <ReactLoading type="bars" color="white" height={25} width={25} /> : "Login"}
         </button>
 
         <Link to="/signup" className="text-sm text-gray-700 mt-4">

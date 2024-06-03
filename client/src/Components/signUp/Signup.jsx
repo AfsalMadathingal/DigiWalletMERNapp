@@ -1,24 +1,24 @@
 import React, { useReducer, useRef, useState } from "react";
 import { FaGoogle, FaApple, FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import Header from "../Header";
-import { Link } from "react-router-dom";
-import ReactLoading from 'react-loading';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import validator from 'validator';
+import { Link, useNavigate } from "react-router-dom";
+import ReactLoading from "react-loading";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import validator from "validator";
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({});
-  const [loading,setLoding] = useState(false)
-  const [nameError,setNameError] = useState(false)
-  const [passwordError,setPasswordError] = useState(false)
-  const [confirmPasswordError,setConfirmPasswordError] = useState(false)
-  const [emailError,setEmailError] = useState(false)
+  const [loading, setLoding] = useState(false);
+  const [nameError, setNameError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
+  const [confirmPasswordError, setConfirmPasswordError] = useState(false);
+  const [emailError, setEmailError] = useState(false);
   const emailRef = useRef();
   const passwordRef = useRef();
   const confirmPasswordRef = useRef();
   const nameRef = useRef();
-  
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -29,70 +29,71 @@ const SignupPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
 
-
-    if(!formData.email || !formData.password || !formData.confirmPassword || !formData.name){
+    if (
+      !formData.email ||
+      !formData.password ||
+      !formData.confirmPassword ||
+      !formData.name
+    ) {
       nameRef.current.style.border = "2px solid red";
       emailRef.current.style.border = "2px solid red";
       passwordRef.current.style.border = "2px solid red";
       confirmPasswordRef.current.style.border = "2px solid red";
       toast.error("Please fill all the fields");
-      return
-    }else if(validator.isAlpha(formData.name) === false){
+      return;
+    } else if (validator.isAlpha(formData.name) === false) {
       nameRef.current.style.border = "2px solid red";
-      setNameError(true)
+      setNameError(true);
       toast.error("Name shoudn't contain any special characters");
-      return
-
-    }else if (!validator.isEmail(formData.email)) {
-      
+      return;
+    } else if (!validator.isEmail(formData.email)) {
       emailRef.current.style.border = "2px solid red";
       toast.error("Please enter a valid email");
-      setEmailError(true)
+      setEmailError(true);
       return;
-    }else if (formData.password !== formData.confirmPassword) {
+    } else if (formData.password !== formData.confirmPassword) {
       passwordRef.current.value = "";
       passwordRef.current.style.border = "2px solid red";
       confirmPasswordRef.current.value = "";
       confirmPasswordRef.current.style.border = "2px solid red";
-      setPasswordError(true)
-      setConfirmPasswordError(true)
+      setPasswordError(true);
+      setConfirmPasswordError(true);
       toast.error("Passwords do not match");
       return;
     }
 
-
-
-
-
-
-    setLoding(true)
+    setLoding(true);
 
     try {
-      
       const res = await fetch("/api/auth/signup", {
         method: "POST",
-  
+
         headers: {
           "Content-Type": "application/json",
         },
-  
+
         body: JSON.stringify(formData),
       });
 
-      setLoding(false)
-  
+      setLoding(false);
+
       const data = await res.json();
-      if (!data.success) {
-       setEmailError(true)
+      console.log(data);
+      if (!data?.success) {
+
+        setEmailError(true);
+        toast.error("something went wrong");
+
+        return
       }
+
+      navigate('/login')
+      toast("Sign Up Successful");
+
     } catch (error) {
-
       console.log(error);
-      
     }
-
   };
 
   const [showPassword, setShowPassword] = useState(false);
@@ -108,40 +109,32 @@ const SignupPage = () => {
 
   return (
     <>
-      <div className="flex justify-center items-center h-screen grad-bg">
-        <div className="w-full max-w-md bg-white shadow-md rounded-lg p-6">
+      <div className="flex justify-center lg:pt-20 h-screen grad-bg">
+        <div className="w-full max-w-full sm:max-w-md md:max-w-lg lg:max-w-xl bg-white shadow-md rounded-lg px-8 py-6 pb-0 m-5 xs:h-[680px] lg:h-[750px]">
           <h2 className="text-2xl font-bold mb-6 text-center">Sign Up</h2>
 
           <div className="mb-4">
             <label className="block text-gray-700">Name</label>
             {nameError && <p className="text-red-500">No special characters</p>}
             <div className="flex items-center border rounded-lg px-3 py-2 mt-1 bg-gray-50">
-              <svg
-                height="20"
-                viewBox="0 0 32 32"
-                width="20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <g id="Layer_3" data-name="Layer 3">
-                  <path d="m30.853 13.87a15 15 0 0 0 -29.729 4.082 15.1 15.1 0 0 0 12.876 12.918 15.6 15.6 0 0 0 2.016.13 14.85 14.85 0 0 0 7.715-2.145 1 1 0 1 0 -1.031-1.711 13.007 13.007 0 1 1 5.458-6.529 2.149 2.149 0 0 1 -4.158-.759v-10.856a1 1 0 0 0 -2 0v1.726a8 8 0 1 0 .2 10.325 4.135 4.135 0 0 0 7.83.274 15.2 15.2 0 0 0 .823-7.455zm-14.853 8.13a6 6 0 1 1 6-6 6.006 6.006 0 0 1 -6 6z" />
-                </g>
-              </svg>
+              <i className="fa-solid fa-user"></i>
               <input
-              ref={nameRef}
+                ref={nameRef}
                 id="name"
                 name="name"
                 onChange={handleChange}
                 type="text"
-                className="w-full border-none outline-none bg-transparent ml-3"
+                className="w-full border-none focus-rounded outline-none bg-transparent ml-3 rounded"
                 placeholder="Enter your name"
               />
             </div>
           </div>
 
           <div className="mb-4">
-            
             <label className="block text-gray-700">Email</label>
-            {emailError && <p className="text-red-500">Email Already Exists</p>}
+            {emailError && (
+              <p className="text-red-500">Email Already Exists or Not Valid</p>
+            )}
             <div className="flex items-center border rounded-lg px-3 py-2 mt-1 bg-gray-50">
               <svg
                 height="20"
@@ -154,12 +147,12 @@ const SignupPage = () => {
                 </g>
               </svg>
               <input
-              ref={emailRef}
+                ref={emailRef}
                 id="email"
                 name="email"
                 onChange={handleChange}
                 type="text"
-                className="w-full border-none outline-none bg-transparent ml-3"
+                className="w-full border-none focus-rounded outline-none bg-transparent ml-3"
                 placeholder="Enter your Email"
               />
             </div>
@@ -167,7 +160,9 @@ const SignupPage = () => {
 
           <div className="mb-4">
             <label className="block text-gray-700">Password</label>
-            {passwordError && <p className="text-red-500">Passwords Do Not Match</p>}
+            {passwordError && (
+              <p className="text-red-500">Passwords Do Not Match</p>
+            )}
             <div className="flex items-center border rounded-lg px-3 py-2 mt-1 bg-gray-50 relative">
               <svg
                 height="20"
@@ -179,12 +174,12 @@ const SignupPage = () => {
                 <path d="m304 224c-8.832031 0-16-7.167969-16-16v-80c0-52.929688-43.070312-96-96-96s-96 43.070312-96 96v80c0 8.832031-7.167969 16-16 16s-16-7.167969-16-16v-80c0-70.59375 57.40625-128 128-128s128 57.40625 128 128v80c0 8.832031-7.167969 16-16 16zm0 0"></path>
               </svg>
               <input
-              ref={passwordRef}
+                ref={passwordRef}
                 id="password"
                 name="password"
                 onChange={handleChange}
                 type={showPassword ? "text" : "password"}
-                className="w-full border-none outline-none bg-transparent ml-3"
+                className="w-full border-none focus-rounded outline-none bg-transparent ml-3"
                 placeholder="Enter your Password"
               />
               <div
@@ -198,7 +193,9 @@ const SignupPage = () => {
 
           <div className="mb-4">
             <label className="block text-gray-700">Confirm Password</label>
-            {passwordError && <p className="text-red-500">Passwords Do Not Match</p>}
+            {passwordError && (
+              <p className="text-red-500">Passwords Do Not Match</p>
+            )}
             <div className="flex items-center border rounded-lg px-3 py-2 mt-1 bg-gray-50 relative">
               <svg
                 height="20"
@@ -210,11 +207,11 @@ const SignupPage = () => {
                 <path d="m304 224c-8.832031 0-16-7.167969-16-16v-80c0-52.929688-43.070312-96-96-96s-96 43.070312-96 96v80c0 8.832031-7.167969 16-16 16s-16-7.167969-16-16v-80c0-70.59375 57.40625-128 128-128s128 57.40625 128 128v80c0 8.832031-7.167969 16-16 16zm0 0"></path>
               </svg>
               <input
-              ref={confirmPasswordRef}
+                ref={confirmPasswordRef}
                 id="confirmPassword"
                 onChange={handleChange}
                 type={showConfirmPassword ? "text" : "password"}
-                className="w-full border-none outline-none bg-transparent ml-3"
+                className="w-full border-none focus-rounded outline-none bg-transparent ml-3"
                 placeholder="Confirm your Password"
               />
               <div
@@ -230,8 +227,16 @@ const SignupPage = () => {
             onClick={handleSubmit}
             className="w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200 btn-grad"
           >
-            {loading ? <ReactLoading type="bars" height="25px" width="25px" color="white" /> : "Sign Up"}
-          
+            {loading ? (
+              <ReactLoading
+                type="bars"
+                height="25px"
+                width="25px"
+                color="white"
+              />
+            ) : (
+              "Sign Up"
+            )}
           </button>
           <Link to="/login" className="text-sm text-gray-700 mt-4">
             Already have an account?{" "}

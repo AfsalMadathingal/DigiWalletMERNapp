@@ -1,0 +1,100 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Outfit:wght@100..900&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Outfit", sans-serif;
+  
+}
+
+.grad-bg{
+
+  background-image: linear-gradient(
+    19deg,
+    #000000 0%,
+    #440862 57%,
+    #262626 100%
+  );
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-image: linear-gradient(
+    19deg,
+    #000000 0%,
+    #440862 57%,
+    #262626 100%
+  );
+
+  font-family: "Roboto", sans-serif;
+  color: #333;
+  overflow-x: hidden;
+
+}
+
+.btn-grad {
+
+
+  background-image: linear-gradient(to right, #0f1625 0%, #34113b  51%, #152958  100%);
+
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  transition: 0.5s;
+  background-size: 200% auto;
+  color: white;            
+  border-radius: 10px;
+
+}
+
+.btn-grad:hover {
+  background-position: right center; /* change the direction of the change here */
+  color: #fff;
+  text-decoration: none;
+}
+
+/* Define the CSS for your transition states */
+.zoom-enter {
+  opacity: 0;
+  transform: scale(0.9);
+}
+.zoom-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 300ms, transform 300ms;
+}
+.zoom-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+.zoom-exit-active {
+  opacity: 0;
+  transform: scale(1.1);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.transition-group {
+  position: relative;
+}
+
+.route-section {
+  position: absolute;
+  width: 100%;
+  height: 100%; /* Ensure it covers the full height */
+  top: 0;
+  left: 0;
+  background-color: #34113b;
+  
+}
+
+.main-container {
+  position: relative;
+  width: 100%;
+  height: 100%; /* Ensure it covers the full height */
+  overflow: hidden; /* Prevent overflow during transitions */
+}
+
+/* Preventing overflow */

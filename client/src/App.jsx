@@ -11,12 +11,15 @@ import About from "./Pages/About/About";
 import Home from './Pages/Home/Home'
 import AdminLogin from "./Pages/Admin/Login/AdminLogin";
 import AdminNav from "./Components/AdminNav";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const location = useLocation();
 
   return (
     <>
+      <ToastContainer theme="dark" position="top-center" autoClose={2000} />
         {location.pathname.includes("/admin") ? <AdminNav/> : <Header />}
       <TransitionGroup className="transition-group">
         <CSSTransition key={location.key} classNames="zoom" timeout={300}>

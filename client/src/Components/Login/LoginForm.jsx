@@ -1,60 +1,64 @@
 import React, { useRef, useState } from "react";
 import { FaGoogle, FaApple, FaRegEye, FaRegEyeSlash } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import validator from "validator";
 import ReactLoading from "react-loading";
-
-
+import { signInStart , signInSuccess, signInFailure } from '../../Redux/user/slice'
+import { useDispatch ,useSelector } from 'react-redux'
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const emailRef = useRef()
-  const passwordRef = useRef()
-
-
+  const {loading} = useSelector(state => state.user)
+  const emailRef = useRef();
+  const passwordRef = useRef();
+  const navigate = useNavigate();
+  const dispatch = useDispatch()
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    if (!email || !password) {
-      toast.error("Please fill all the fields");
-      emailRef.current.style.border = "2px solid red";
-      passwordRef.current.style.border = "2px solid red";
-      return;
-    }else if (!validator.isEmail(email)) {
-      toast.error("Please enter a valid email");
-      emailRef.current.style.border = "2px solid red";
-      return;
-    }
-
-    const data = await fetch('/api/auth/login',{
-      method:"POST",
-      headers:{
-        "content-type":"application/json"
-      },
-      body:JSON.stringify({
-        email,
-        password
-      })
-    })
-
-    const res = await data.json()
-
-    console.log(res);
-    
-    if(!res.success) return toast.error(res.message) , setLoading(false)
-
-    if(res.success){  
+    try {
+      dispatch(signInStart())
+      if (!email || !password) {
+        toast.error("Please fill all the fields");
+        emailRef.current.style.border = "2px solid red";
+        passwordRef.current.style.border = "2px solid red";
+        dispatch(signInFailure())
+  
+        return;
+      } else if (!validator.isEmail(email)) {
+        toast.error("Please enter a valid email");
+        emailRef.current.style.border = "2px solid red";
+        dispatch(signInFailure())
+        return;
+      }
+  
+      const data = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+  
+      const res = await data.json();
+      if (!res.success) return toast.error(res.message),dispatch(signInFailure())
+  
       toast.success("Welcome Back");
-      setLoading(false)
+      navigate("/home");
+      dispatch(signInSuccess(res))
+      
+    } catch (error) {
+      
+      toast.error(error.message)
+      dispatch(signInFailure())
     }
-
-
-  }
+    
+  }; 
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -101,7 +105,7 @@ const LoginPage = () => {
               <path d="m304 224c-8.832031 0-16-7.167969-16-16v-80c0-52.929688-43.070312-96-96-96s-96 43.070312-96 96v80c0 8.832031-7.167969 16-16 16s-16-7.167969-16-16v-80c0-70.59375 57.40625-128 128-128s128 57.40625 128 128v80c0 8.832031-7.167969 16-16 16zm0 0"></path>
             </svg>
             <input
-            ref={passwordRef}
+              ref={passwordRef}
               type={showPassword ? "text" : "password"}
               className="w-full border-none outline-none bg-transparent ml-3"
               placeholder="Enter your Password"
@@ -126,8 +130,15 @@ const LoginPage = () => {
           </a>
         </div>
 
-        <button onClick={handleLogin} className="w-full py-2 bg-blue-500 text-white rounded-lg transition duration-200 btn-grad">
-         {loading ? <ReactLoading type="bars" color="white" height={25} width={25} /> : "Login"}
+        <button
+          onClick={handleLogin}
+          className="w-full py-2 bg-blue-500 text-white rounded-lg transition duration-200 btn-grad"
+        >
+          {loading ? (
+            <ReactLoading type="bars" color="white" height={25} width={25} />
+          ) : (
+            "Login"
+          )}
         </button>
 
         <Link to="/signup" className="text-sm text-gray-700 mt-4">

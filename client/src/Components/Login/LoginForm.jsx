@@ -6,6 +6,7 @@ import validator from "validator";
 import ReactLoading from "react-loading";
 import { signInStart , signInSuccess, signInFailure } from '../../Redux/user/slice'
 import { useDispatch ,useSelector } from 'react-redux'
+import useGoogleAuth from "../../hook/GoogleAuth";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,6 +17,7 @@ const LoginPage = () => {
   const passwordRef = useRef();
   const navigate = useNavigate();
   const dispatch = useDispatch()
+  const {signInWithGoogle} = useGoogleAuth()
 
   const handleLogin = async (e) => {
     try {
@@ -49,7 +51,7 @@ const LoginPage = () => {
       if (!res.success) return toast.error(res.message),dispatch(signInFailure())
   
       toast.success("Welcome Back");
-      navigate("/home");
+      navigate("/dashboard");
       dispatch(signInSuccess(res))
       
     } catch (error) {
@@ -59,6 +61,45 @@ const LoginPage = () => {
     }
     
   }; 
+
+
+  const handleGoogleLogin = async () => {
+
+  try {
+
+    dispatch(signInStart())
+
+    const result = await signInWithGoogle();
+
+    if (!result) return toast.error("Login Failed");
+
+    const apiResult = await fetch('/api/auth/google',{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        result})
+    })
+
+    const data = await apiResult.json()
+    
+    if(!data.success) return toast.error(data.message)
+    
+    toast.success("Welcome Back");
+
+    navigate("/dashboard");
+
+    console.log(data);
+   
+    dispatch(signInSuccess(result))
+    
+  } catch (error) {
+
+    toast.error(error.message)
+  }
+
+  };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -155,8 +196,8 @@ const LoginPage = () => {
         </div>
 
         <div className="flex justify-between">
-          <button className="flex items-center justify-center w-full py-2 mr-2 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition duration-200">
-            <FaGoogle className="mr-2" /> Google
+          <button onClick={handleGoogleLogin}  className="flex items-center justify-center w-full py-2 mr-2 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition duration-200">
+            <FaGoogle  className="mr-2" /> Google
           </button>
           <button className="flex items-center justify-center w-full py-2 ml-2 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition duration-200">
             <FaApple className="mr-2" /> Apple

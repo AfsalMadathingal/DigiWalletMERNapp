@@ -6,10 +6,12 @@ import ReactLoading from "react-loading";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import validator from "validator";
+import useGoogleAuth from "../../hook/GoogleAuth";
+import { signInStart , signInSuccess, signInFailure } from '../../Redux/user/slice'
+import { useDispatch ,useSelector } from 'react-redux'
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({});
-  const [loading, setLoding] = useState(false);
   const [nameError, setNameError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [confirmPasswordError, setConfirmPasswordError] = useState(false);
@@ -19,6 +21,41 @@ const SignupPage = () => {
   const confirmPasswordRef = useRef();
   const nameRef = useRef();
   const navigate = useNavigate();
+  const  {signInWithGoogle} = useGoogleAuth()
+  const {loading} = useSelector(state => state.user)
+  const dispatch = useDispatch()
+
+  const handleGoogleLogin = async () => {
+
+    try {
+  
+      dispatch(signInStart())
+  
+      const result = await signInWithGoogle();
+  
+      if (!result) return toast.error("Login Failed");
+  
+      const apiResult = await fetch('/api/auth/google',{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          result})
+      })
+  
+      const data = await apiResult.json()
+  
+      console.log(data);
+     
+      dispatch(signInSuccess(result))
+      
+    } catch (error) {
+  
+      toast.error(error.message)
+    }
+  
+    };
 
   const handleChange = (e) => {
     setFormData({
@@ -63,7 +100,7 @@ const SignupPage = () => {
       return;
     }
 
-    setLoding(true);
+    dispatch(signInStart())
 
     try {
       const res = await fetch("/api/auth/signup", {
@@ -76,10 +113,12 @@ const SignupPage = () => {
         body: JSON.stringify(formData),
       });
 
-      setLoding(false);
+      
 
       const data = await res.json();
-      console.log(data);
+
+      dispatch(signInSuccess(res))
+
       if (!data?.success) {
 
         setEmailError(true);
@@ -251,7 +290,7 @@ const SignupPage = () => {
           </div>
 
           <div className="flex justify-between">
-            <button className="flex items-center justify-center w-full py-2 mr-2 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition duration-200">
+            <button onClick={handleGoogleLogin} className="flex items-center justify-center w-full py-2 mr-2 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition duration-200">
               <FaGoogle className="mr-2" /> Google
             </button>
             <button className="flex items-center justify-center w-full py-2 ml-2 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition duration-200">

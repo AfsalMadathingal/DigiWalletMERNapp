@@ -16,6 +16,9 @@ import "react-toastify/dist/ReactToastify.css";
 import PrivateRoute from "./Components/PrivateRoute";
 import PublicRoute from "./Components/PublicRoute";
 import UserDashboard from "./Components/UserDashboard";
+import PrivateRouteAdmin from "./Components/PrivateRoute";
+import PublicRouteAdmin from "./Components/PublicRouteAdmin";
+import AdminDashboard from "./Pages/Admin/Dashboard/AdminDashboard";
 
 function App() {
   const location = useLocation();
@@ -23,11 +26,10 @@ function App() {
   return (
     <>
       <ToastContainer theme="dark" position="top-center" autoClose={2000} />
-      {location.pathname.includes("/admin") ? <AdminNav /> :  <Header />}
+      {location.pathname.includes("/admin") ? <AdminNav /> : <Header />}
       <TransitionGroup className="transition-group">
         <CSSTransition key={location.key} classNames="zoom" timeout={300}>
           <Routes location={location}>
-
             <Route element={<PublicRoute />}>
               <Route path="*" element={<Landing />} />
               <Route path="/" element={<Landing />} />
@@ -35,13 +37,13 @@ function App() {
               <Route path="/signup" element={<SignUp />} />
             </Route>
             <Route path="/about" element={<About />} />
-
-            <Route element={<PrivateRoute />}>
-              <Route path="/dashboard" element={<UserDashboard/>} />
+            <Route element={<PublicRouteAdmin />}>
+              <Route path="/admin/login" element={<AdminLogin />} />
             </Route>
-            
-
-            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route element={<PrivateRoute />}>
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            </Route>
+            <Route element={<PrivateRouteAdmin />}></Route>
           </Routes>
         </CSSTransition>
       </TransitionGroup>

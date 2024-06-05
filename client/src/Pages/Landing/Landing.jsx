@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import Header from "../../Components/Header";
-import CreditCardAnimation from "../../Components/CreditCardAnimation";
+import CreditCardAnimation from "../../Components/CreditCard/CreditCardAnimation";
 
 const Home = () => {
   useEffect(() => {

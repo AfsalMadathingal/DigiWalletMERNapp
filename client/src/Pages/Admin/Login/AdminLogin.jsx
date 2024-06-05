@@ -1,10 +1,72 @@
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { FaGoogle, FaApple, FaRegEye, FaRegEyeSlash } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { adminSignInFailure, adminSignInStart, adminSignInSuccess } from "../../../Redux/admin/adminSlice";
+import { toast } from "react-toastify";
+import ReactLoading from "react-loading";
+
+
 
 const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [id,setId ]= useState()
+  const [password,setPassword]= useState()
+  const dispatch = useDispatch()
+  const { loading } = useSelector((state) => state.admin)
+  const passwordRef = useRef()
+  const idRef = useRef()
+  const navigate = useNavigate();
+  
+
+
+const handleLogin = async ()=>{
+
+  try {
+    
+    dispatch(adminSignInStart())
+    if (!id || !password) {
+      toast.error("Please fill all the fields");
+      dispatch(adminSignInFailure())
+      passwordRef.current.style.border = "2px solid red";
+      idRef.current.style.border = "2px solid red";
+      return;
+    }
+
+    const data = await fetch('/api/auth/admin-auth/login',{
+      method:'POST',
+      headers:{
+        "Content-type":"application/json"
+      },
+      body:JSON.stringify({
+        id,
+        password
+      })
+    })
+
+    const res = await data.json();
+    if (!res.success) return toast.error(res.message),dispatch(adminSignInFailure())
+    
+    dispatch(adminSignInSuccess(res))
+
+    toast.success("Welcome Back");
+    navigate('/admin/dashboard')
+
+  } catch (error) {
+
+    console.log('====================================');
+    console.log(error);
+    console.log('====================================');
+    dispatch(adminSignInFailure())
+    toast.error(error.message)
+
+  }
+  
+
+}
+
+
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -24,6 +86,8 @@ const AdminLogin = () => {
           <div className="flex items-center border rounded-lg px-3 py-2 mt-1 bg-gray-50">
           <i className="fa-solid fa-id-card"></i>
             <input
+              ref={idRef}
+              onChange={(e)=>{setId(e.target.value)}}
               type="text"
               className="w-full border-none outline-none bg-transparent ml-3"
               placeholder="Enter your Id"
@@ -44,6 +108,8 @@ const AdminLogin = () => {
               <path d="m304 224c-8.832031 0-16-7.167969-16-16v-80c0-52.929688-43.070312-96-96-96s-96 43.070312-96 96v80c0 8.832031-7.167969 16-16 16s-16-7.167969-16-16v-80c0-70.59375 57.40625-128 128-128s128 57.40625 128 128v80c0 8.832031-7.167969 16-16 16zm0 0"></path>
             </svg>
             <input
+              ref={passwordRef}
+              onChange={(e)=>{setPassword(e.target.value)}}
               type={showPassword ? "text" : "password"}
               className="w-full border-none outline-none bg-transparent ml-3"
               placeholder="Enter your Password"
@@ -56,8 +122,10 @@ const AdminLogin = () => {
             </div>
           </div>
         </div>
-        <button className="w-full py-4 mt-12 bg-blue-500 text-white rounded-lg transition duration-200 btn-grad">
-          Log In
+        <button 
+       onClick={handleLogin}
+       className="w-full py-4 mt-12 bg-blue-500 text-white rounded-lg transition duration-200 btn-grad">
+          {loading ? "Loading..." : "Login"}
         </button>
 
 

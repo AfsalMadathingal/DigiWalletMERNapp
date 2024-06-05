@@ -12,7 +12,7 @@
   background-image: linear-gradient(
     19deg,
     #000000 0%,
-    #440862 57%,
+    #190524 57%,
     #262626 100%
   );
   background-blend-mode: luminosity;
@@ -27,7 +27,7 @@ body {
   background-image: linear-gradient(
     19deg,
     #000000 0%,
-    #440862 57%,
+    #170420 57%,
     #262626 100%
   );
 
@@ -40,7 +40,7 @@ body {
 .btn-grad {
 
 
-  background-image: linear-gradient(to right, #0f1625 0%, #34113b  51%, #152958  100%);
+  background-image: linear-gradient(to right, #5b395f 0%, #740d06  51%, #143070  100%);
 
   text-align: center;
   align-items: center;

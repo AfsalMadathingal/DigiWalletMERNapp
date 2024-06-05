@@ -3,11 +3,13 @@ const app = express();
 const cors = require("cors");
 const mongoose = require("mongoose");
 require("dotenv").config();
+const cookieParser = require('cookie-parser');
 const userRoute =  require('./router/userRoute')
 const adminRoute = require ('./router/adminRoute')
 const authRoute = require('./router/authRoute')
+const adminAuth = require('./router/adminAuth')
 
-
+app.use(cookieParser());
 app.use(cors());
 app.use(express.json({ extended: true }));
 app.use(express.urlencoded({ extended: true }));
@@ -18,7 +20,7 @@ mongoose.connect(process.env.DATABASE).then(() => {
     console.log(err);
 })
 
-
+app.use('/api/auth/admin-auth',adminAuth);
 app.use('/api/auth',authRoute);
 app.use('/api/user',userRoute);
 app.use('/api/admin',adminRoute);

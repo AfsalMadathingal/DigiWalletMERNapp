@@ -149,7 +149,7 @@ const SignupPage = () => {
   return (
     <>
       <div className="flex justify-center lg:pt-20 h-screen grad-bg">
-        <div className="w-full max-w-full sm:max-w-md md:max-w-lg lg:max-w-xl bg-white shadow-md rounded-lg px-8 py-6 pb-0 m-5 xs:h-[680px] lg:h-[750px]">
+        <div className="w-96 max-w-full sm:max-w-md md:max-w-lg lg:max-w-xl bg-white shadow-md rounded-lg px-8 py-6 pb-0 m-5 xs:h-[680px] lg:h-[700px]">
           <h2 className="text-2xl font-bold mb-6 text-center">Sign Up</h2>
 
           <div className="mb-4">

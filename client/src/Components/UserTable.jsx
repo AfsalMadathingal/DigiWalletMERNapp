@@ -1,14 +1,46 @@
 import React, { useState } from "react";
 import UserDetailsModal from "./UserDetailsModal";
-import { Button } from "@nextui-org/react";
+import { Button, user } from "@nextui-org/react";
 import DarkModeConfirmAlert from "./DarkModeConfirmAlert";
+import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import { updatingUserFailure, updatingUserStart, updatingUserSuccess } from "../Redux/admin/adminSlice";
 
 const UserTable = ({ users, setSelectedUser, setViewing, setEditing }) => {
   const [isAlertVisible, setIsAlertVisible] = useState(false);
+  const {updating} = useSelector(state => state.admin)
+  const dispatch = useDispatch();
 
-  const handleConfirm = () => {
+
+  const handleConfirm = async (user) => {
     setIsAlertVisible(false);
-    // Add your confirm logic here
+    dispatch(updatingUserStart());
+    console.log(user);
+    try {
+      
+      const res = await fetch('/api/admin/delete-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(user),
+      });
+      const data = await res.json();
+
+    if (data.success) {
+      toast.success('User deleted successfully');
+      dispatch(updatingUserSuccess(data));
+    } else {
+      toast.error(`Error: ${data.message}`);
+      dispatch(updatingUserFailure(data.message));
+    }
+    } catch (error) {
+
+      toast.error(`Error: ${error.message}`);
+    }
+
+    
+    
   };
 
   const handleCancel = () => {
@@ -67,7 +99,7 @@ const UserTable = ({ users, setSelectedUser, setViewing, setEditing }) => {
                 {isAlertVisible && (
                   <DarkModeConfirmAlert
                     message="Are you sure you want to proceed?"
-                    onConfirm={handleConfirm}
+                    onConfirm={() => handleConfirm(user)}
                     onCancel={handleCancel}
                   />
                 )}

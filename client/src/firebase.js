@@ -2,6 +2,8 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
+console.log(import.meta.env.VITE_API_KEY)
+
 const firebaseConfig = {
   apiKey: "AIzaSyDo9Zd7Kp5AQyPfMFRLndfiMNI1hUdB39o",
   authDomain: "digiwallet-mernauth.firebaseapp.com",
@@ -17,4 +19,4 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
-export { auth, googleProvider };
+export { auth, googleProvider , app };

@@ -5,6 +5,7 @@ const initialState = {
     currentAdmin: null,
     loading : false,
     error: false,
+    updating: false,
 };
 
 
@@ -37,10 +38,24 @@ const adminSlice = createSlice({
             state.error = false;
 
         },
+        updatingUserStart:(state)=>{
+            state.loading = true;
+            state.updating = true;
+        },
+        updatingUserSuccess:(state)=>{
+
+            state.loading = false;
+            state.updating = false;
+        },
+        updatingUserFailure:(state,action)=>{
+            state.loading = false;
+            state.error = action.payload;
+            state.updating = false;
+        }
     }
 
 })
 
 
-export const {adminSignInStart,adminSignInSuccess,adminSignInFailure ,adminSignOutStart,adminSignOutSuccess} = adminSlice.actions;
+export const {adminSignInStart,adminSignInSuccess,adminSignInFailure ,adminSignOutStart,adminSignOutSuccess ,updatingUserStart ,updatingUserSuccess,updatingUserFailure} = adminSlice.actions;
 export default adminSlice.reducer

@@ -17,6 +17,17 @@ const getUsers = async (req, res, next) => {
     }
 }
 
+const updateUser= async (req, res, next) => {
+    try {
+
+        const {_id}= req.body;
+        const user = await userModal.findByIdAndUpdate(_id,req.body,{new:true});
+        res.status(200).json({success: true, user});
+        
+    } catch (error) {
+        next(error)
+    }
+}
 
 
-module.exports = {getUsers}
+module.exports = {getUsers ,updateUser}

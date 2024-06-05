@@ -19,6 +19,7 @@
     "@nextui-org/react": "^2.4.1",
     "@nextui-org/theme": "^2.2.5",
     "@reduxjs/toolkit": "^2.2.5",
+    "dotenv": "^16.4.5",
     "firebase": "^10.12.2",
     "flowbite": "^2.3.0",
     "framer-motion": "^11.2.10",

@@ -7,7 +7,9 @@ const cookieParser = require('cookie-parser');
 const userRoute =  require('./router/userRoute')
 const adminRoute = require ('./router/adminRoute')
 const authRoute = require('./router/authRoute')
-const adminAuth = require('./router/adminAuth')
+const adminAuth = require('./router/adminAuth');
+const verifyUser = require('./utils/verifyUser');
+const verifyAdmin = require('./utils/veryfyAdmin');
 
 app.use(cookieParser());
 app.use(cors());
@@ -22,8 +24,8 @@ mongoose.connect(process.env.DATABASE).then(() => {
 
 app.use('/api/auth/admin-auth',adminAuth);
 app.use('/api/auth',authRoute);
-app.use('/api/user',userRoute);
-app.use('/api/admin',adminRoute);
+app.use('/api/user',verifyUser,userRoute);
+app.use('/api/admin',verifyAdmin,adminRoute);
 
 
 app.use((err, req, res, next) => {

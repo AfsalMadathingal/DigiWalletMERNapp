@@ -10,12 +10,15 @@ import {
   updatingUserSuccess,
   updatingUserFailure,
 } from "../../../Redux/admin/adminSlice";
+import CreateUserModal from "../../../Components/CreateUserModal";
 
 const AdminDashboard = () => {
   const [selectedUser, setSelectedUser] = useState({});
   const [isEditing, setEditing] = useState(false);
+  const [isCreating, setCreating] = useState(false);
   const [isViewing, setViewing] = useState(false);
   const [users, setUsers] = useState([]);
+  const [usersBackup, setUsersBackup] = useState([]);
   const navigate = useNavigate();
   const { loading, updating } = useSelector((state) => state.admin);
   const dispatch = useDispatch();
@@ -45,6 +48,31 @@ const AdminDashboard = () => {
     }
   };
 
+  const createUser = async (newUser) => {
+    
+    dispatch(updatingUserStart());
+    try {
+      const res = await fetch("/api/admin/create-user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newUser),
+      });
+
+      const response = await res.json();
+
+      if (!response.success) return toast.error(`Error: ${response.message}`);
+      setCreating(false);
+      toast.success("User Created Successfully");
+      dispatch(updatingUserSuccess(response));
+    } catch (error) {
+      dispatch(updatingUserFailure(error.message));
+      toast.error(`Error: ${error.message}`);
+    }
+
+  };
+
   useEffect(() => {
     const getUser = async () => {
       try {
@@ -64,6 +92,7 @@ const AdminDashboard = () => {
         }
 
         setUsers(data.users);
+        setUsersBackup(data.users);
 
         console.log(users);
       } catch (error) {
@@ -75,6 +104,10 @@ const AdminDashboard = () => {
     getUser();
   }, [updating]);
 
+
+
+
+
   return (
     <div className="flex h-[93vh]">
       <Sidebar />
@@ -82,7 +115,10 @@ const AdminDashboard = () => {
         <UserTable
           setViewing={setViewing}
           users={users}
+          usersBackup={usersBackup}
+          setUsers={setUsers}
           setEditing={setEditing}
+          setCreating={setCreating}
           setSelectedUser={(user) => {
             setSelectedUser(user);
           }}
@@ -91,9 +127,16 @@ const AdminDashboard = () => {
       {isEditing && (
         <EditUserModal
           user={selectedUser}
+          
           setSelectedUser={setSelectedUser}
           setEditing={setEditing}
           saveUser={saveUser}
+        />
+      )}
+      {isCreating && (
+        <CreateUserModal
+          setCreating={setCreating}
+          createUser = {createUser}
         />
       )}
     </div>

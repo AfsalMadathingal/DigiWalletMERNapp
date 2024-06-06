@@ -1,46 +1,79 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import UserDetailsModal from "./UserDetailsModal";
 import { Button, user } from "@nextui-org/react";
 import DarkModeConfirmAlert from "./DarkModeConfirmAlert";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
-import { updatingUserFailure, updatingUserStart, updatingUserSuccess } from "../Redux/admin/adminSlice";
+import {
+  updatingUserFailure,
+  updatingUserStart,
+  updatingUserSuccess,
+} from "../Redux/admin/adminSlice";
 
-const UserTable = ({ users, setSelectedUser, setViewing, setEditing }) => {
+const UserTable = ({
+  users,
+  setUsers,
+  setSelectedUser,
+  setViewing,
+  setEditing,
+  setCreating,
+  usersBackup,
+}) => {
   const [isAlertVisible, setIsAlertVisible] = useState(false);
-  const {updating} = useSelector(state => state.admin)
+  const { updating } = useSelector((state) => state.admin);
   const dispatch = useDispatch();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [allUsers, setAllUsers] = useState([...users]);
 
+  const handleSearch = (event) => {
+    
+    const value = event.target.value;
+    setSearchTerm(value);
+
+  };
+
+  useEffect(() => {
+    setUsers(usersBackup);
+    if (!searchTerm) {
+      
+      console.log("all usersr",allUsers);
+      setUsers(usersBackup);
+    } else {
+      const filteredItems = users.filter(
+        (user) =>
+          user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.phone.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+      setUsers(filteredItems);
+    }
+  }, [searchTerm]);
 
   const handleConfirm = async (user) => {
     setIsAlertVisible(false);
     dispatch(updatingUserStart());
     console.log(user);
     try {
-      
-      const res = await fetch('/api/admin/delete-user', {
-        method: 'POST',
+      const res = await fetch("/api/admin/delete-user", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(user),
       });
       const data = await res.json();
 
-    if (data.success) {
-      toast.success('User deleted successfully');
-      dispatch(updatingUserSuccess(data));
-    } else {
-      toast.error(`Error: ${data.message}`);
-      dispatch(updatingUserFailure(data.message));
-    }
+      if (data.success) {
+        toast.success("User deleted successfully");
+        dispatch(updatingUserSuccess(data));
+      } else {
+        toast.error(`Error: ${data.message}`);
+        dispatch(updatingUserFailure(data.message));
+      }
     } catch (error) {
-
       toast.error(`Error: ${error.message}`);
     }
-
-    
-    
   };
 
   const handleCancel = () => {
@@ -51,12 +84,16 @@ const UserTable = ({ users, setSelectedUser, setViewing, setEditing }) => {
     <div className="flex-grow p-6  bg-gray-600 bg-opacity-20 backdrop-filter backdrop-blur-lg text-white shadow-md rounded-lg  ">
       <div className="flex justify-between mb-4">
         <h2 className="text-2xl font-semibold">Users</h2>
-        <Button color="secondary">Add User</Button>
+        <Button onClick={() => setCreating(true)} color="secondary">
+          Add User
+        </Button>
       </div>
       <input
         type="text"
+        value={searchTerm}
+        onChange={handleSearch}
         placeholder="Search Person"
-        className="mb-4 p-2 border rounded w-full"
+        className="mb-4 p-2 border text-black rounded w-full"
       />
       <table className="w-full text-left table-auto rounded-lg">
         <thead>

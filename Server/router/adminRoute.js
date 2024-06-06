@@ -1,13 +1,12 @@
 const express = require("express");
-const adminModel = require("../models/adminModel");
 const router = express.Router();
-const verifyAdmin = require("../utils/veryfyAdmin");
-const { getUsers, updateUser, deleteUser } = require("../controller/adminController");
+const { getUsers, updateUser, deleteUser , createUser} = require("../controller/adminController");
 
 
-router.get('/get-user',verifyAdmin,getUsers)
-router.post('/edit-user',verifyAdmin, updateUser)
-router.post('/delete-user',verifyAdmin, deleteUser)
+router.get('/get-user',getUsers)
+router.post('/edit-user', updateUser)
+router.post('/create-user', createUser)
+router.post('/delete-user', deleteUser)
 
 
 module.exports = router

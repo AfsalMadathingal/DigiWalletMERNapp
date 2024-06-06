@@ -1,14 +1,18 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { Avatar, Button } from "@nextui-org/react";
 import { useFirebase } from "../store/firebaseContext";
 import ReactLoading from "react-loading";
+import validator from "validator";
 
 const EditUserModal = ({ user, setEditing, saveUser }) => {
   const [formData, setFormData] = useState(user);
   const [loadin,setLoading] = useState(false)
   const [ image , setImage] = useState(null)
   const {uploadFile} = useFirebase();
+  const nameRef = useRef();
+  const emailRef = useRef();
+  const phoneRef = useRef();
 
   const handleChange = (e) => {
     setFormData({
@@ -19,6 +23,25 @@ const EditUserModal = ({ user, setEditing, saveUser }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if(!formData.name || !formData.email || !formData.phone){
+      nameRef.current.style.border = "1px solid red";
+      emailRef.current.style.border = "1px solid red";
+      phoneRef.current.style.border = "1px solid red";
+      toast.error("field should not be empty") 
+      return
+    }else if(!validator.isAlpha(formData.name)){
+      nameRef.current.style.border = "1px solid red";
+      toast.error("name should be alphabetic") 
+      return
+    }else if(!validator.isEmail(formData.email)){
+      emailRef.current.style.border = "1px solid red";
+      toast.error("invalid email") 
+      return
+    }else if(!validator.isMobilePhone(formData.phone)){
+      phoneRef.current.style.border = "1px solid red";
+      toast.error("invalid phone") 
+      return
+    }
     saveUser(formData);
   };
 
@@ -50,6 +73,7 @@ const EditUserModal = ({ user, setEditing, saveUser }) => {
             <input
               type="text"
               name="name"
+              ref={nameRef}
               value={formData.name}
               onChange={handleChange}
               className="w-full p-2 border rounded"
@@ -60,6 +84,7 @@ const EditUserModal = ({ user, setEditing, saveUser }) => {
             <input
               type="email"
               name="email"
+              ref={emailRef}
               value={formData.email}
               onChange={handleChange}
               className="w-full p-2 border rounded"
@@ -70,6 +95,7 @@ const EditUserModal = ({ user, setEditing, saveUser }) => {
             <input
               type="text"
               name="phone"
+              ref={phoneRef}
               value={formData.phone}
               onChange={handleChange}
               className="w-full p-2 border rounded"

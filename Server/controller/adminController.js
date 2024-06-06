@@ -1,4 +1,6 @@
 const userModal = require("../models/userModel");
+const errorHandler = require("../utils/error");
+const bcrypt = require("bcrypt");
 
 
 const getUsers = async (req, res, next) => {   
@@ -46,5 +48,25 @@ const deleteUser = async (req, res, next) => {
     }
 }
 
+const createUser = async (req, res, next) => {
+    try {
+        const {email, password, name, phone, profilePic} = req.body;
 
-module.exports = {getUsers ,updateUser,deleteUser}
+
+        console.log(req.body);
+        const existing = await userModal.findOne({email});
+        if(existing) return next(errorHandler(400,"Email already exists"));
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = new userModal({ name, email, password: hashedPassword, phone ,profilePic});
+        await user.save();
+
+        res.status(200).json({success: true, user});
+        
+    } catch (error) {
+
+        next(error)
+    }
+}
+
+
+module.exports = {getUsers ,updateUser,deleteUser,createUser}

@@ -48,6 +48,9 @@ const LoginPage = () => {
       });
   
       const res = await data.json();
+
+      console.log(res)
+
       if (!res.success) return toast.error(res.message),dispatch(signInFailure())
   
       toast.success("Welcome Back");
@@ -92,7 +95,7 @@ const LoginPage = () => {
 
     console.log(data);
    
-    dispatch(signInSuccess(result))
+    dispatch(signInSuccess(data))
     
   } catch (error) {
 

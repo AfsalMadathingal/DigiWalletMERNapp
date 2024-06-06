@@ -1,38 +1,94 @@
-// src/components/Navbar.js
+import React from "react";
+import {Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar} from "@nextui-org/react";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
-import React, { useState } from 'react';
 
-const UserNav = () => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+export default function UserNav() {
 
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
+  const {currentUser} = useSelector((state) => state.user)
+  const navigate = useNavigate()
+
+  console.log(currentUser);
+
+  const handleLogout = () => {
+    try {
+      localStorage.clear();
+      localStorage.removeItem('token');
+      toast.success("Logged Out Successfully");
+      navigate("/")
+    
+    } catch (error) {
+      
+      toast.error(`Error: ${error.message}`);
+    }
+  }
+
+  let user = currentUser.others
+
+  user = user? user : currentUser.user
+
+  console.log("user from nav",user);
+
 
   return (
-    <nav className="bg-white shadow p-4">
-      <div className="container mx-auto flex justify-between items-center">
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            <button onClick={toggleDropdown} className="flex items-center space-x-2 focus:outline-none">
-              <img
-                className="w-10 h-10 rounded-full"
-                src="https://via.placeholder.com/40"
-                alt="User Avatar"
-              />
-              <span className="text-gray-700">Username</span>
-            </button>
-            {isDropdownOpen && (
-              <div className="absolute mt-2 w-48 bg-white rounded-md shadow-lg z-10">
-                <a href="#" className="block px-4 py-2 text-gray-800 hover:bg-gray-200">Profile</a>
-                <a href="#" className="block px-4 py-2 text-gray-800 hover:bg-gray-200">Logout</a>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
-};
+    <Navbar className="bg-[#0a0a0a] z-10 opacity-100 text-white" variant="sticky" >
+      <NavbarBrand>
+       
+        <p className="font-bold ">DigiWallet</p>
+      </NavbarBrand>
 
-export default UserNav;
+      <NavbarContent className="hidden text-white z-20 sm:flex gap-4" justify="center">
+        <NavbarItem>
+          <Link color="white" href="#">
+            Home
+          </Link>
+        </NavbarItem>
+        <NavbarItem >
+          <Link href="#" aria-current="page" color="white">
+            About
+          </Link>
+        </NavbarItem>
+        <NavbarItem>
+          <Link color="white" href="#">
+            Contact
+          </Link>
+        </NavbarItem>
+      </NavbarContent>
+
+      <NavbarContent as="div" justify="end">
+        <Dropdown placement="bottom-end">
+          <DropdownTrigger>
+            <Avatar
+              isBordered
+              as="button"
+              className="transition-transform"
+              color="secondary"
+              name="Jason Hughes"
+              size="sm"
+              src={user?.profilePic}
+            />
+          </DropdownTrigger>
+          <DropdownMenu aria-label="Profile Actions" variant="flat">
+            <DropdownItem key="profile" className="h-14 gap-2">
+              <p className="font-semibold">Signed in as</p>
+              <p className="font-semibold">{user?.email}</p>
+            </DropdownItem>
+            <DropdownItem key="settings">My Profile</DropdownItem>
+            <DropdownItem key="team_settings">Team Settings</DropdownItem>
+            <DropdownItem key="analytics">Analytics</DropdownItem>
+            <DropdownItem key="system">System</DropdownItem>
+            <DropdownItem key="configurations">Configurations</DropdownItem>
+            <DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>
+            <DropdownItem onClick={handleLogout} key="logout" color="danger">
+              Log Out
+            </DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
+      </NavbarContent>
+    </Navbar>
+  );
+}
+
+

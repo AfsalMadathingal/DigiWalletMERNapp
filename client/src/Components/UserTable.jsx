@@ -48,7 +48,7 @@ const UserTable = ({ users, setSelectedUser, setViewing, setEditing }) => {
   };
 
   return (
-    <div className="flex-grow p-6  bg-blue-200 bg-opacity-20 backdrop-filter backdrop-blur-lg text-white shadow-md rounded-lg  ">
+    <div className="flex-grow p-6  bg-gray-600 bg-opacity-20 backdrop-filter backdrop-blur-lg text-white shadow-md rounded-lg  ">
       <div className="flex justify-between mb-4">
         <h2 className="text-2xl font-semibold">Users</h2>
         <Button color="secondary">Add User</Button>

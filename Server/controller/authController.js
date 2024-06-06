@@ -56,7 +56,9 @@ const googleSignIn = async (req, res, next) => {
   try {
 
 
-      const {email,displayName,photoUrl}=req.body.result.user
+      const {email,displayName,photoURL}=req.body.result.user
+
+      console.log(req.body.result.user);
 
       const user = await userModel.findOne({email})
 
@@ -74,7 +76,7 @@ const googleSignIn = async (req, res, next) => {
         const newUser = new userModel({
           name:displayName,
           email,
-          profilePic:photoUrl,
+          profilePic:photoURL,
           password:hashedPassword,
         });
 

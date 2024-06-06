@@ -16,17 +16,21 @@ import "react-toastify/dist/ReactToastify.css";
 import PrivateRoute from "./Components/PrivateRoute";
 import PublicRoute from "./Components/PublicRoute";
 import UserDashboard from "./Components/UserDashboard";
-import PrivateRouteAdmin from "./Components/PrivateRoute";
+import PrivateRouteAdmin from "./Components/PrivateRouteAdmin";
 import PublicRouteAdmin from "./Components/PublicRouteAdmin";
 import AdminDashboard from "./Pages/Admin/Dashboard/AdminDashboard";
+import { useSelector } from "react-redux";
+import UserNav from "./Components/UserNav";
+import UserProfile from "./Components/UserProfile";
 
 function App() {
   const location = useLocation();
+  const {currentUser} = useSelector((state) => state.user)
 
   return (
     <>
       <ToastContainer theme="dark" position="top-center" autoClose={2000} />
-      {location.pathname.includes("/admin") ? <AdminNav /> : <Header />}
+      {location.pathname.includes("/admin") ? <AdminNav /> : currentUser ? <UserNav/> : <Header />}
       <TransitionGroup className="transition-group">
         <CSSTransition key={location.key} classNames="zoom" timeout={300}>
           <Routes location={location}>
@@ -36,11 +40,16 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
             </Route>
+            <Route element={<PrivateRoute />}>
+              <Route path="/home" element={<Home />} />
+              <Route path="/dashboard" element={<UserDashboard />} />
+              <Route path="/profile" element={<UserProfile />} />
+            </Route>
             <Route path="/about" element={<About />} />
             <Route element={<PublicRouteAdmin />}>
               <Route path="/admin/login" element={<AdminLogin />} />
             </Route>
-            <Route element={<PrivateRoute />}>
+            <Route element={<PrivateRouteAdmin />}>
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
             </Route>
             <Route element={<PrivateRouteAdmin />}></Route>

@@ -42,6 +42,10 @@ const login = async (req, res, next) => {
 
     var {password,...others} = user._doc
 
+    console.log('=================otheres===================');
+    console.log(others);
+    console.log('====================================');
+
     res.cookie("token",token,{httpOnly:true}).status(200).json({success:true,message:"login success",others})
     
   } catch (error) {
@@ -58,7 +62,7 @@ const googleSignIn = async (req, res, next) => {
 
       const {email,displayName,photoURL}=req.body.result.user
 
-      console.log(req.body.result.user);
+      console.log("from body google ",req.body.result.user);
 
       const user = await userModel.findOne({email})
 
@@ -66,7 +70,8 @@ const googleSignIn = async (req, res, next) => {
 
         const token = jwt.sign({id:user._id},process.env.JWT_SECRET_KEY);
         const expireDate = new Date(Date.now()+60*60*24*1000)
-        res.cookie("token",token,{httpOnly:true,expires:expireDate}).status(200).json({success:true,message:"login success",user})
+        const {password,...userData} = user._doc
+        res.cookie("token",token,{httpOnly:true,expires:expireDate}).status(200).json({success:true,message:"login success",user:userData})
 
       } else {
 
@@ -83,7 +88,8 @@ const googleSignIn = async (req, res, next) => {
         await newUser.save();
         const token = jwt.sign({id:newUser._id},process.env.JWT_SECRET_KEY);
         const expireDate = new Date(Date.now()+60*60*24*1000)
-        res.cookie("token",token,{httpOnly:true,expires:expireDate}).status(200).json({success:true,message:"login success",user:newUser})
+        const{password,...userData} = newUser._doc
+        res.cookie("token",token,{httpOnly:true,expires:expireDate}).status(200).json({success:true,message:"login success",user:userData})
       }
 
 
@@ -94,4 +100,16 @@ const googleSignIn = async (req, res, next) => {
   }
 }
 
-module.exports = { signup , login ,googleSignIn};
+
+const logout = async (req, res, next) => {
+  try {
+    
+    res.cookie("token",null,{httpOnly:true ,expires:new Date(Date.now())}).status(200).json({success:true,message:"logout success"})
+
+
+  } catch (error) {
+    
+  }
+}
+
+module.exports = { signup , login ,googleSignIn,logout};

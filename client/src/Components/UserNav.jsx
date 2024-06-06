@@ -1,21 +1,41 @@
 import React from "react";
 import {Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar} from "@nextui-org/react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
+import { signInFailure, signInStart, signInSuccess, signOutStart, signOutSuccess } from "../Redux/user/slice";
+
 
 
 export default function UserNav() {
 
   const {currentUser} = useSelector((state) => state.user)
   const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   console.log(currentUser);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     try {
-      localStorage.clear();
-      localStorage.removeItem('token');
+      dispatch(signOutStart());
+      const response = await fetch("/api/auth/logout", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+      console.log(data);
+
+      if(!data.status) {
+        dispatch(signOutSuccess())
+        return toast.error(data.message)
+      }
+
+      dispatch(signInSuccess());
+
       toast.success("Logged Out Successfully");
       navigate("/")
     
@@ -41,19 +61,13 @@ export default function UserNav() {
 
       <NavbarContent className="hidden text-white z-20 sm:flex gap-4" justify="center">
         <NavbarItem>
-          <Link color="white" href="#">
-            Home
-          </Link>
+          <RouterLink to="/">Home</RouterLink>
         </NavbarItem>
         <NavbarItem >
-          <Link href="#" aria-current="page" color="white">
-            About
-          </Link>
+          <RouterLink to="/about">About</RouterLink>
         </NavbarItem>
         <NavbarItem>
-          <Link color="white" href="#">
-            Contact
-          </Link>
+          <RouterLink to="/contact">Contact</RouterLink>
         </NavbarItem>
       </NavbarContent>
 
@@ -75,7 +89,9 @@ export default function UserNav() {
               <p className="font-semibold">Signed in as</p>
               <p className="font-semibold">{user?.email}</p>
             </DropdownItem>
-            <DropdownItem key="settings">My Profile</DropdownItem>
+            <DropdownItem key="settings">
+            <RouterLink to="/profile">Profile</RouterLink>
+            </DropdownItem>
             <DropdownItem key="team_settings">Team Settings</DropdownItem>
             <DropdownItem key="analytics">Analytics</DropdownItem>
             <DropdownItem key="system">System</DropdownItem>

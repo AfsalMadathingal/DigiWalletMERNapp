@@ -8,21 +8,42 @@ const userModel = require("../models/userModel");
 
 const signup = async (req, res, next) => {
     
-  const { name, email, password } = req.body;
+  var { name, email, password } = req.body;
 
   try {
 
     const hashedPassword = bcrypt.hashSync(password, 10);
     const newUser = new userModal({ name, email, password: hashedPassword });
     await newUser.save();
-    res.status(200).json({success: true, message: "User created successfully"});
+    var {password,...others} = newUser._doc
+
+    res.cookie("token",jwt.sign({id:newUser._id,role:"user"},process.env.JWT_SECRET_KEY),{httpOnly:true}).status(200).json({success: true, message: "User created successfully",user:others});
+   
 
   } catch (error) {
+    
 
     next(error);
   }
 };
 
+const verifyUser = async (req, res, next) => {
+
+  try {
+    const token = req.cookies.token;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    const user = await userModal.findById(decoded.id);
+    if(!user) return next(errorHandler(404,"User not found"))
+    
+    res.status(200).json({ success: true, user });  
+
+  } catch (error) {
+    console.log('====================================');
+    console.log(error);
+    console.log('====================================');
+    next(error);
+  }
+};
 
 const login = async (req, res, next) => {
 
@@ -38,15 +59,12 @@ const login = async (req, res, next) => {
 
     if(!passwordCheck)return next(errorHandler(401,"wrong Credentials"))
 
-    const token = jwt.sign({id:user._id},process.env.JWT_SECRET_KEY);
+    const token = jwt.sign({id:user._id,role:"user"},process.env.JWT_SECRET_KEY);
 
     var {password,...others} = user._doc
 
-    console.log('=================otheres===================');
-    console.log(others);
-    console.log('====================================');
 
-    res.cookie("token",token,{httpOnly:true}).status(200).json({success:true,message:"login success",others})
+    res.cookie("token",token,{httpOnly:true}).status(200).json({success:true,message:"login success",user:others})
     
   } catch (error) {
     next(error);
@@ -62,13 +80,13 @@ const googleSignIn = async (req, res, next) => {
 
       const {email,displayName,photoURL}=req.body.result.user
 
-      console.log("from body google ",req.body.result.user);
+
 
       const user = await userModel.findOne({email})
 
       if (user) {
 
-        const token = jwt.sign({id:user._id},process.env.JWT_SECRET_KEY);
+        const token = jwt.sign({id:user._id,role:"user"},process.env.JWT_SECRET_KEY);
         const expireDate = new Date(Date.now()+60*60*24*1000)
         const {password,...userData} = user._doc
         res.cookie("token",token,{httpOnly:true,expires:expireDate}).status(200).json({success:true,message:"login success",user:userData})
@@ -86,7 +104,7 @@ const googleSignIn = async (req, res, next) => {
         });
 
         await newUser.save();
-        const token = jwt.sign({id:newUser._id},process.env.JWT_SECRET_KEY);
+        const token = jwt.sign({id:newUser._id,role:"user"},process.env.JWT_SECRET_KEY);
         const expireDate = new Date(Date.now()+60*60*24*1000)
         const{password,...userData} = newUser._doc
         res.cookie("token",token,{httpOnly:true,expires:expireDate}).status(200).json({success:true,message:"login success",user:userData})
@@ -112,4 +130,4 @@ const logout = async (req, res, next) => {
   }
 }
 
-module.exports = { signup , login ,googleSignIn,logout};
+module.exports = { signup , login ,googleSignIn,logout, verifyUser};

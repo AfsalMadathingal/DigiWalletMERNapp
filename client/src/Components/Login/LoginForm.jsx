@@ -19,6 +19,7 @@ const LoginPage = () => {
   const dispatch = useDispatch()
   const {signInWithGoogle} = useGoogleAuth()
 
+
   const handleLogin = async (e) => {
     try {
       dispatch(signInStart())
@@ -51,7 +52,14 @@ const LoginPage = () => {
 
       console.log(res)
 
-      if (!res.success) return toast.error(res.message),dispatch(signInFailure())
+      if (!res.success){
+
+        toast.error(res.message)
+        dispatch(signInFailure())
+
+        return
+
+      } 
   
       toast.success("Welcome Back");
       navigate("/dashboard");
@@ -74,7 +82,13 @@ const LoginPage = () => {
 
     const result = await signInWithGoogle();
 
-    if (!result) return toast.error("Login Failed");
+
+
+    if (!result) {
+      toast.error("Something went wrong");
+      dispatch(signInFailure())
+      return 
+    }
 
     const apiResult = await fetch('/api/auth/google',{
       method:"POST",
@@ -87,7 +101,7 @@ const LoginPage = () => {
 
     const data = await apiResult.json()
     
-    if(!data.success) return toast.error(data.message)
+    if(!data.success) return toast.error(data.message); dispatch(signInFailure())
     
     toast.success("Welcome Back");
 
@@ -98,7 +112,7 @@ const LoginPage = () => {
     dispatch(signInSuccess(data))
     
   } catch (error) {
-
+    dispatch(signInFailure())
     toast.error(error.message)
   }
 

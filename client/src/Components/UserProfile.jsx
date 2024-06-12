@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button } from '@nextui-org/react';
 import { useFirebase } from '../store/firebaseContext';
@@ -10,10 +10,8 @@ import {updateStart, updateSuccess, updateFailure} from '../Redux/user/slice'
 const UserProfile = () => {
 
     const {currentUser} = useSelector((state) => state.user)
-    const [email, setEmail] = useState("")
-    const [name, setName] = useState("")
-    const [profilePic, setProfilePic] = useState("")
-    const [image , setImage] = useState(null)
+    const [image , setImage] = useState(false)
+    const [url,setUrl] = useState("")
     const [formData, setFormData] = useState(currentUser.user);
     const {uploadFile} = useFirebase();
     const [saveButton, setSaveButton] = useState(true)
@@ -22,92 +20,96 @@ const UserProfile = () => {
     const passwordRef = useRef();
     const confirmPasswordRef = useRef();
     const phoneRef = useRef();
-    const genderRef = useRef();
+    const profilePicRef = useRef();
     const {loading} = useSelector((state) => state.user)
     const dispatch = useDispatch();
-    
+
+  
 
 
-    const {user} = currentUser
-
-    console.log("currentUser",currentUser);
-    console.log("form",formData);
 
     const handleChange = (e) => {
       setSaveButton(false)
-      setFormData({
-        ...formData,
-        [e.target.name]: e.target.value,
-      });
+      setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-   
-      dispatch(updateStart())
-      if(image){
-       const  url = await uploadFile(image);
-       setFormData({ 
-        ...formData,
-        profilePic: url,
-      });
+
+  const imageInputHandle = (e) => {
+    setImage(e.target.files[0]);
+    setSaveButton(false)
+  }
+
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      dispatch(updateStart());
+  
+      let imageUrl = url; 
+  
+      if (image instanceof File) {
+        imageUrl = await uploadFile(image);
+        setUrl(imageUrl); 
       }
-
-      
-      if(!formData.name && !formData.email  && !formData.password && !formData.confirmPassword && !formData.gender && !formData.phone){
-        toast.error("At least one field should be filled") 
-        return
-      }else if(!formData.name || !formData.email){
-        toast.error("Name and email should not be empty")
-        nameRef.current.style.border = "2px solid red"
-        emailRef.current.style.border = "2px solid red"
-        return
-      }else if(!validator.isAlpha(formData.name)){
-        toast.error("Name shoudn't contain any special characters")
-        nameRef.current.style.border = "2px solid red"
-        return
-      }else if(!validator.isEmail(formData.email)){
-        toast.error("Please enter a valid email")
-        emailRef.current.style.border = "2px solid red"
-        return
-      }else if( formData.phone && !validator.isMobilePhone(formData.phone)){
-
-        toast.error("Please enter a valid phone number")
-        phoneRef.current.style.border = "2px solid red"
-        return
-
-      } else if( formData.password || formData.confirmPassword){
-
-        if(formData.password !== formData.confirmPassword){
-          toast.error("Passwords do not match")
-          toast.error("Passwords do not match")
-        passwordRef.current.style.border = "2px solid red"
-        confirmPasswordRef.current.style.border = "2px solid red"
-        return
+  
+      if (!formData.name && !formData.email && !formData.password && !formData.confirmPassword && !formData.gender && !formData.phone) {
+        toast.error("At least one field should be filled");
+        dispatch(updateFailure());
+        return;
+      } else if (!formData.name || !formData.email) {
+        toast.error("Name and email should not be empty");
+        nameRef.current.style.border = "2px solid red";
+        emailRef.current.style.border = "2px solid red";
+        dispatch(updateFailure());
+        return;
+      } else if (!validator.isAlpha(formData.name)) {
+        toast.error("Name shouldn't contain any special characters");
+        nameRef.current.style.border = "2px solid red";
+        dispatch(updateFailure());
+        return;
+      } else if (!validator.isEmail(formData.email)) {
+        toast.error("Please enter a valid email");
+        emailRef.current.style.border = "2px solid red";
+        dispatch(updateFailure());
+        return;
+      } else if (formData.phone && !validator.isMobilePhone(formData.phone)) {
+        toast.error("Please enter a valid phone number");
+        phoneRef.current.style.border = "2px solid red";
+        dispatch(updateFailure());
+        return;
+      } else if (formData.password || formData.confirmPassword) {
+        if (formData.password !== formData.confirmPassword) {
+          toast.error("Passwords do not match");
+          passwordRef.current.style.border = "2px solid red";
+          confirmPasswordRef.current.style.border = "2px solid red";
+          dispatch(updateFailure());
+          return;
         }
-      
       }
-
+  
       const data = await fetch("/api/user/updateProfile", {
         method: "POST",
         headers: {
           "content-type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, url: imageUrl }),
       });
-
-
+  
       const result = await data.json();
-      if(result.success){
+      if (result.success) {
         console.log(result);
-        dispatch(updateSuccess(result))
-        toast.success(result.message)
-      }else{
-        toast.error(result.message)
+        dispatch(updateSuccess(result));
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+        dispatch(updateFailure(result.message));
       }
-      
-    };
-
+  
+    } catch (error) {
+      dispatch(updateFailure(error));
+      toast.error(error.message);
+    }
+  };
 
 
   return (
@@ -116,12 +118,12 @@ const UserProfile = () => {
       <div className="flex flex-col sm:flex-row items-center sm:items-start">
         <img
           className="w-24 h-24 rounded-full sm:w-32 sm:h-32"
-          src={ image ? URL.createObjectURL(image) : user?.profilePic}
+          src={ image ? URL.createObjectURL(image) : formData?.profilePic}
           alt="Profile"
         />
         <div className="sm:ml-6 mt-4 sm:mt-0">
-          <h2 className="text-2xl font-semibold">{user?.name}</h2>
-          <p className="text-gray-600">{user?.email}</p>
+          <h2 className="text-2xl font-semibold">{formData?.name}</h2>
+          <p className="text-gray-600">{formData?.email}</p>
         </div>
       </div>
       <div className="mt-6">
@@ -135,7 +137,7 @@ const UserProfile = () => {
               ref={nameRef}
               onChange={handleChange}
               value={formData.name}
-              placeholder="Your First Name"
+              placeholder={formData.name}
             />
           </div>
           <div>
@@ -145,20 +147,20 @@ const UserProfile = () => {
               type="text"
               name="email"
               ref={emailRef}
-              onChange={handleChange}
               value={formData.email}
-              placeholder="Your First Name"
+              onChange={handleChange}
+              placeholder={formData.email}
+              
             />
           </div>
           <div>
             <label className="block text-gray-700">Gender</label>
             <select
               name="gender"
-              value={formData.gender}
               onChange={handleChange}
               className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
             >
-              <option>{user?.gender}</option>
+              <option>{formData?.gender}</option>
               <option>Male</option>
               <option>Female</option>
             </select>
@@ -170,9 +172,8 @@ const UserProfile = () => {
               type="text"
               name="phone"
               ref={phoneRef}
-              value={formData.phone}
+              placeholder={formData.phone}
               onChange={handleChange}
-              placeholder="Your  Phone Number"
             />
           </div>
           <div>
@@ -183,7 +184,7 @@ const UserProfile = () => {
               name="password"
               ref={passwordRef}
               onChange={handleChange}
-              placeholder="Your  Phone Number"
+              placeholder="password"
             />
           </div>
           <div>
@@ -194,7 +195,7 @@ const UserProfile = () => {
               name="confirmPassword"
               ref={confirmPasswordRef}
               onChange={handleChange}
-              placeholder="Your  Phone Number"
+              placeholder="Confirm Password"
             />
           </div>
           <div>
@@ -203,8 +204,9 @@ const UserProfile = () => {
               className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
               type="file"
               name='profilePic'
-              onChange={(e) => setImage(e.target.files[0])}
-              placeholder="Your  Phone Number"
+              ref={profilePicRef}
+              onChange={imageInputHandle}
+              placeholder='Chose Profile Pic'
             />
           </div>
         </div>

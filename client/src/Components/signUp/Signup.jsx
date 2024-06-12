@@ -117,20 +117,20 @@ const SignupPage = () => {
 
       const data = await res.json();
 
-      dispatch(signInSuccess(res))
-
       if (!data?.success) {
 
         setEmailError(true);
         toast.error("something went wrong");
-
+        dispatch(signInFailure())
         return
       }
 
       navigate('/login')
+      dispatch(signInSuccess(data))
       toast("Sign Up Successful");
 
     } catch (error) {
+      dispatch(signInFailure(error))
       console.log(error);
     }
   };

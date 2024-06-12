@@ -1,15 +1,27 @@
 const jwt = require("jsonwebtoken");
 
 const verifyUser = (req, res, next) => {
-    const token = req.cookies.access_token;
+
+    const token = req.cookies.token;
+    console.log('===============token=====================');
+    console.log(token);
+    console.log('====================================');
     if (!token) {
-        return res.status(401).json("You are not authenticated");
+        console.log('==================not authenticated ==================');
+        console.log(res.cookies);
+        console.log('====================================');
+        return res.status(401).json({success: false, message: "You are not authenticated"});
     }
 
-    jwt.verify(token, "jwtkey", (err, userInfo) => {
+    jwt.verify(token, process.env.JWT_SECRET_KEY, (err, userInfo) => {
+
         if (err) {
-            return res.status(403).json("Token is not valid");
+            return res.status(403).json({ success: false, message: "Token is not valid" });
         }
+
+        
+
+        if(userInfo.role!=="user") return res.status(403).json({ success: false, message: "You are not authorized" });
 
         req.user = userInfo;
         next();

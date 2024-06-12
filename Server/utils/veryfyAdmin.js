@@ -7,6 +7,7 @@ const verifyAdmin = (req, res, next) => {
 
 
     if (!token) {
+
         return res.status(401).json({ success: false, message: "You are not authenticated" });
     }
 
@@ -15,7 +16,7 @@ const verifyAdmin = (req, res, next) => {
         if (err) {
             return res.status(403).json({ success: false, message: "Token is not valid" });
         }
-
+        if(userInfo.role!=="admin") return res.status(403).json({ success: false, message: "You are not authorized" });
         req.user = userInfo;
         next();
     });

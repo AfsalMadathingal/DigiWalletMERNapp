@@ -11,7 +11,7 @@ const adminLogin = async (req,res,next)=>{
         if (!admin) return next(errorHandler(404,"Admin not found"))
         const passwordCheck = bcrypt.compareSync(password, admin.password);
         if(!passwordCheck)return next(errorHandler(401,"wrong Credentials"))
-        const token = jwt.sign({id:admin._id},process.env.JWT_SECRET_KEY);
+        const token = jwt.sign({id:admin._id,role:"admin"},process.env.JWT_SECRET_KEY);
         var {password,...others} = admin._doc
         const expireDate = new Date(Date.now()+60*60*24*1000)
 

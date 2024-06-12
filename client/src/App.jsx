@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import "./App.css";
 import Header from "./Components/Header";
@@ -19,13 +19,38 @@ import UserDashboard from "./Components/UserDashboard";
 import PrivateRouteAdmin from "./Components/PrivateRouteAdmin";
 import PublicRouteAdmin from "./Components/PublicRouteAdmin";
 import AdminDashboard from "./Pages/Admin/Dashboard/AdminDashboard";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import UserNav from "./Components/UserNav";
 import UserProfile from "./Components/UserProfile";
+import { isLogin } from "./Redux/user/slice";
+
 
 function App() {
   const location = useLocation();
-  const {currentUser} = useSelector((state) => state.user)
+  const {currentUser } = useSelector((state) => state.user)
+  const dispatch = useDispatch()
+
+  useEffect(()=>{
+
+    fetch("/api/auth/verifyuser",{
+      method:"GET",
+      headers:{
+        "Content-Type":"application/json",
+      },
+    }).then(res => res.json())
+    .then(data => {
+
+      console.log(data);
+
+      if(!data.success){
+
+        dispatch(isLogin(null))
+      }
+    })
+
+  },[])
+
+
 
   return (
     <>

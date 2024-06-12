@@ -14,7 +14,7 @@ export default function UserNav() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
-  console.log(currentUser);
+  console.log("curren",currentUser);
 
   const handleLogout = async () => {
     try {
@@ -48,8 +48,6 @@ export default function UserNav() {
   let user = currentUser.others
 
   user = user? user : currentUser.user
-
-  console.log("user from nav",user);
 
 
   return (
